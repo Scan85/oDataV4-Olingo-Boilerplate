@@ -12,15 +12,154 @@
 
 	<!-- project version -->
 	<properties>
+		<java.version>1.9</java.version>
 		<javax.version>2.5</javax.version>
 		<odata.version>4.4.0</odata.version>
+		<cxf.version>3.1.5</cxf.version>
 		<slf4j.version>1.7.25</slf4j.version>
+		<olingo.version>2.0.10</olingo.version>
 		<maven.compiler.source>1.6</maven.compiler.source>
 		<maven.compiler.target>1.6</maven.compiler.target>
 	</properties>
 
 	<url>http://maven.apache.org</url>
+	<profiles>
+		<!-- HANA Cloud Platform -->
+		<profile>
+			<id>hcp</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<properties>
+				<packaging.type>war</packaging.type>
+				<tomcat.version>7.0.59</tomcat.version>
+			</properties>
+			<dependencies>
+				<dependency>
+					<groupId>org.springframework.boot</groupId>
+					<artifactId>spring-boot-starter-web</artifactId>
+					<version>2.0.3.RELEASE</version>
+					<!-- Some exclusions are necessary to make Spring Boot run on HCP. -->
+					<exclusions>
+						<exclusion>
+							<groupId>org.springframework.boot</groupId>
+							<artifactId>spring-boot-starter-tomcat</artifactId>
+						</exclusion>
+						<exclusion>
+							<groupId>org.apache.tomcat.embed</groupId>
+							<artifactId>tomcat-embed-el</artifactId>
+						</exclusion>
+						<exclusion>
+							<artifactId>logback-classic</artifactId>
+							<groupId>ch.qos.logback</groupId>
+						</exclusion>
+					</exclusions>
+				</dependency>
+				<dependency>
+					<groupId>org.springframework.boot</groupId>
+					<artifactId>spring-boot-starter-data-jpa</artifactId>
+					<version>2.0.3.RELEASE</version>
+					<!-- Without this exclusions, the HCP runtime will not be so happy -->
+					<exclusions>
+						<exclusion>
+							<artifactId>logback-classic</artifactId>
+							<groupId>ch.qos.logback</groupId>
+						</exclusion>
+					</exclusions>
+				</dependency>
+				<dependency>
+					<groupId>javax.servlet</groupId>
+					<artifactId>javax.servlet-api</artifactId>
+					<version>3.0.1</version>
+					<scope>provided</scope>
+				</dependency>
+			</dependencies>
+		</profile>
+
+		<!-- Self-contained JAR -->
+		<profile>
+			<id>jar</id>
+			<properties>
+				<packaging.type>jar</packaging.type>
+			</properties>
+			<dependencies>
+				<dependency>
+					<groupId>org.springframework.boot</groupId>
+					<artifactId>spring-boot-starter-web</artifactId>
+				</dependency>
+				<dependency>
+					<groupId>org.springframework.boot</groupId>
+					<artifactId>spring-boot-starter-data-jpa</artifactId>
+				</dependency>
+				<dependency>
+					<groupId>org.apache.olingo</groupId>
+					<artifactId>olingo-odata2-jpa-processor-api</artifactId>
+					<version>${olingo.version}</version>
+					<exclusions>
+						<exclusion>
+							<artifactId>javax.persistence</artifactId>
+							<groupId>org.eclipse.persistence</groupId>
+						</exclusion>
+					</exclusions>
+				</dependency>
+				<dependency>
+					<groupId>org.apache.olingo</groupId>
+					<artifactId>olingo-odata2-jpa-processor-core</artifactId>
+					<version>${olingo.version}</version>
+					<exclusions>
+						<exclusion>
+							<artifactId>javax.persistence</artifactId>
+							<groupId>org.eclipse.persistence</groupId>
+						</exclusion>
+					</exclusions>
+				</dependency>
+			</dependencies>
+			<build>
+				<plugins>
+					<plugin>
+						<artifactId>maven-resources-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>copy-resources</id>
+								<phase>validate</phase>
+								<goals>
+									<goal>copy-resources</goal>
+								</goals>
+								<configuration>
+									<outputDirectory>${basedir}/target/classes/static</outputDirectory>
+									<resources>
+										<resource>
+											<directory>src/main/webapp</directory>
+											<filtering>true</filtering>
+										</resource>
+									</resources>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
 	<dependencies>
+		<!-- https://mvnrepository.com/artifact/mysql/mysql-connector-java -->
+		<dependency>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+			<version>8.0.11</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.hsqldb/hsqldb -->
+		<dependency>
+			<groupId>org.hsqldb</groupId>
+			<artifactId>hsqldb</artifactId>
+			<version>2.4.1</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.cxf</groupId>
+			<artifactId>cxf-rt-frontend-jaxrs</artifactId>
+			<version>${cxf.version}</version>
+		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
@@ -72,5 +211,26 @@
 	</dependencies>
 	<build>
 		<finalName>odata4</finalName>
+		<plugins>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>${java.version}</source>
+					<target>${java.version}</target>
+				</configuration>
+			</plugin>
+		</plugins>
 	</build>
+	<pluginRepositories>
+		<pluginRepository>
+			<id>spring-releases</id>
+			<name>Spring Releases</name>
+			<url>https://repo.spring.io/libs-release</url>
+		</pluginRepository>
+	</pluginRepositories>
 </project>
