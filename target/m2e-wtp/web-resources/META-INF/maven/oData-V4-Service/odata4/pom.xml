@@ -69,13 +69,6 @@
 			<version>1.7.11</version>
 			<scope>compile</scope>
 		</dependency>
-		<!-- https://mvnrepository.com/artifact/oracle/ojdbc14 -->
-		<dependency>
-			<groupId>oracle</groupId>
-			<artifactId>ojdbc14</artifactId>
-			<version>10.2.0.4</version>
-		</dependency>
-
 	</dependencies>
 	<build>
 		<finalName>odata4</finalName>
