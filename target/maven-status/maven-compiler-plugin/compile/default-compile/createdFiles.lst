@@ -1,0 +1,7 @@
+odataservice\odatav4\service\EdmProvider.class
+odataservice\odatav4\service\EntityProcessor.class
+odataservice\odatav4\data\Storage.class
+odataservice\odatav4\web\Servlet.class
+odataservice\odatav4\service\EntityCollectionProcessor.class
+odataservice\odatav4\service\PrimitiveProcessor.class
+odataservice\odatav4\util\Util.class
